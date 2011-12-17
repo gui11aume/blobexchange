@@ -1,0 +1,3 @@
+Blobexchange is a web app that allows you to upload a blob (binary large object) through HTTP and let anyone download it for up to 3 days.
+
+Blobexchange is depolyed at http://blobexchange.appspot.com and uses Google App Engine.
