@@ -1,0 +1,5 @@
+cron:
+- description: daily sending job
+  url: /delete
+  schedule: every day 9:00
+  target: version-1

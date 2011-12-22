@@ -3,6 +3,7 @@
 
 import os
 import urllib
+import datetime
 
 from google.appengine.ext import blobstore
 from google.appengine.ext import webapp
@@ -72,11 +73,23 @@ class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
       self.send_blob(blob_info)
 
 
+class DeleteHandler(blobstore_handlers.BlobstoreDownloadHandler):
+   def get(self):
+      three_days_ago = datetime.datetime.today() \
+            + datetime.timedelta(days=-3)
+      blob_count = blobstore.BlobInfo.all().count()
+      all_blobs_query = blobstore.BlobInfo.all().fetch(blob_count)
+      for blob in all_blobs_query:
+         if blob.creation < three_days_ago:
+            blob.delete()
+
+
 def main():
    application = webapp.WSGIApplication(
         [('/', MainHandler),
          ('/upload', UploadHandler),
          ('/download/([^/]+)?', ServeHandler),
+         ('/delete', DeleteHandler),
         ], debug=True)
    run_wsgi_app(application)
 
