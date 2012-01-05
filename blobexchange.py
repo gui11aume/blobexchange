@@ -21,7 +21,7 @@ class MainHandler(webapp.RequestHandler):
       content_values = {
          'upload_url': upload_url,
       }
-      
+
       content_path = os.path.join(dot, 'content', 'upload_content.html')
       content = template.render(content_path, content_values)
 
@@ -31,7 +31,7 @@ class MainHandler(webapp.RequestHandler):
          'page_title': 'Blob Exchange Upload',
          'page_content': content,
       }
-      
+
       # ... and send!
       self.response.out.write(
             template.render(template_path, template_values)
@@ -49,7 +49,7 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
       content_values = {
          'blob_link': blob_info.key(),
       }
-      
+
       content_path = os.path.join(dot, 'content', 'link_content.html')
       content = template.render(content_path, content_values)
 
@@ -59,7 +59,7 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
          'page_title': 'Blob Exchange (upload succesful)',
          'page_content': content,
       }
-      
+
       # ... and send!
       self.response.out.write(
             template.render(template_path, template_values)
@@ -70,7 +70,19 @@ class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
    def get(self, resource):
       resource = str(urllib.unquote(resource))
       blob_info = blobstore.BlobInfo.get(resource)
-      self.send_blob(blob_info)
+      self.send_blob(blob_info, save_as=True)
+
+   # Example to open in browser:
+
+   # blob_info = blobstore.BlobInfo.get(resource)
+   # type = blob_info.content_type
+   # if type == 'application/pdf':       
+   #    self.response.headers['Content-Type'] = type
+   #    self.send_blob(blob_info,save_as=False)
+   # else:
+   #    self.send_blob(blob_info,save_as=True)
+
+
 
 
 class DeleteHandler(blobstore_handlers.BlobstoreDownloadHandler):
