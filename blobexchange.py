@@ -5,6 +5,7 @@ import os
 import urllib
 import datetime
 
+from google.appengine.ext import db
 from google.appengine.ext import blobstore
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import blobstore_handlers
@@ -12,8 +13,17 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 
+class BlobRef(db.Model):
+   """Datastore entry for blobs."""
+   blob_key = blobstore.BlobReferenceProperty(
+                  blobstore.BlobKey,
+                  required = True
+              )
+
+
 class MainHandler(webapp.RequestHandler):
    def get(self):
+      # Create an upload URL to pass to the template.
       upload_url = blobstore.create_upload_url('/upload')
       dot = os.path.dirname(__file__)
 
@@ -39,15 +49,22 @@ class MainHandler(webapp.RequestHandler):
 
 
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
+   """Handle file post."""
    def post(self):
-      upload_files = self.get_uploads('file')
       dot = os.path.dirname(__file__)
-      blob_info = upload_files[0]
-      blob_info.key()
+
+      # NB: 'get_uploads' is a list of 'BlobInfo' objects.
+      blob_info = self.get_uploads('file')[0]
+      blob_ref = BlobRef(
+          key_name = blob_info.filename,
+          blob_key = blob_info.key()
+      )
+      blob_ref.put()
 
       # First fill in the content itself (not the HTML page).
       content_values = {
-         'blob_link': blob_info.key(),
+         # 'blob_link': blob_info.key(),
+         'blob_link': blob_info.filename
       }
 
       content_path = os.path.join(dot, 'content', 'link_content.html')
@@ -66,23 +83,10 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
       )
 
 
-class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
-   def get(self, resource):
-      resource = str(urllib.unquote(resource))
-      blob_info = blobstore.BlobInfo.get(resource)
-      self.send_blob(blob_info, save_as=True)
-
-   # Example to open in browser:
-
-   # blob_info = blobstore.BlobInfo.get(resource)
-   # type = blob_info.content_type
-   # if type == 'application/pdf':       
-   #    self.response.headers['Content-Type'] = type
-   #    self.send_blob(blob_info,save_as=False)
-   # else:
-   #    self.send_blob(blob_info,save_as=True)
-
-
+class NewHandler(blobstore_handlers.BlobstoreDownloadHandler):
+   def get(self, path):
+      blob = BlobRef.get_by_key_name(path)
+      self.send_blob(blob.blob_key, save_as=True)
 
 
 class DeleteHandler(blobstore_handlers.BlobstoreDownloadHandler):
@@ -100,7 +104,7 @@ def main():
    application = webapp.WSGIApplication(
         [('/', MainHandler),
          ('/upload', UploadHandler),
-         ('/download/([^/]+)?', ServeHandler),
+         ('/download/([^/]+)?', NewHandler),
          ('/delete', DeleteHandler),
         ], debug=True)
    run_wsgi_app(application)
