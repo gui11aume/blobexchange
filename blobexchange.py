@@ -92,7 +92,7 @@ class NewHandler(blobstore_handlers.BlobstoreDownloadHandler):
 class DeleteHandler(blobstore_handlers.BlobstoreDownloadHandler):
    def get(self):
       three_days_ago = datetime.datetime.today() \
-            + datetime.timedelta(days=-3)
+            + datetime.timedelta(days=-15)
       blob_count = blobstore.BlobInfo.all().count()
       all_blobs_query = blobstore.BlobInfo.all().fetch(blob_count)
       for blob in all_blobs_query:
