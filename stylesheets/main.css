@@ -16,16 +16,13 @@ p {
 
 /* Other stuff */
 
-#outer_container {
+#floater {
+  height:170px;
+  width:100%;
 }
 #body {
-  position:absolute;
-  width:500px;
-  height:100px;
-  top:50%;
-  left:50%;
-  margin-top:-50px;
-  margin-left:-250px;
+  margin-left:auto;
+  margin-right:auto;
   text-align:center;
 }
 #footer {

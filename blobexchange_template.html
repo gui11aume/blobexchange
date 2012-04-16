@@ -5,14 +5,13 @@
     <title>{{ page_title|safe }}</title>
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
     <style type="text/css">
-    <!--{{ page_css|safe }}-->
     </style>
   </head>
   <body>
-    <div id="outer_container">
-    <div id="body">{{ page_content|safe }}
+    <div id="floater"></div>
+    <div id="body">
+      {{ page_content|safe }}
       <div id="footer"></div>
     </div>
-    </div><!-- end outer_container -->
   </body>
 </html>
